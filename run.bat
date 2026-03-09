@@ -1,0 +1,9 @@
+@echo off
+echo Démarrage du Générateur de Rapport KPI 3G...
+echo.
+echo Vérification des dépendances...
+pip install -r requirements.txt
+echo.
+echo Lancement de l'application...
+python main.py
+pause
