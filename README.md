@@ -28,7 +28,7 @@ This tool operates **100% locally**. It does not use any external APIs or servic
 ## Usage
 1. **Template File:** Click "Browse" and select the template Excel file.
 2. **Raw Data File:** Click "Browse" and select the raw data Excel file containing the latest KPI metrics.
-3. **Output Folder:** Click "Browse" and select the folder where the generated report will be saved.
+3. **Save As:** Click "Browse" and select the location and filename where the generated report will be saved.
 4. Click **Generate Excel Report**.
 
 ## Logic and Rules applied
