@@ -3,7 +3,7 @@ from tkinter import ttk, filedialog, messagebox
 import pandas as pd
 from datetime import datetime
 import openpyxl
-from openpyxl.styles import PatternFill
+from openpyxl.styles import PatternFill, Font
 import os
 from pathlib import Path
 
@@ -121,10 +121,10 @@ class KPIApp:
         # Filter dataframe for only these last 10 hours
         df_filtered = df[df['Begin Time'].isin(unique_hours)].copy()
 
-        # Make sure values are numeric where possible, if not fill with 0
+        # Make sure values are numeric where possible, keep NaN as NaN
         for raw_kpi in kpi_mapping.values():
             if raw_kpi in df_filtered.columns:
-                df_filtered[raw_kpi] = pd.to_numeric(df_filtered[raw_kpi], errors='coerce').fillna(0)
+                df_filtered[raw_kpi] = pd.to_numeric(df_filtered[raw_kpi], errors='coerce')
 
         # Build the final structured data for our report
 
@@ -147,7 +147,8 @@ class KPIApp:
                     # Find the value for this specific hour
                     val_df = df_entity[df_entity['Begin Time'] == hour]
                     if not val_df.empty and raw_kpi in val_df.columns:
-                        kpi_row[hour] = val_df.iloc[0][raw_kpi]
+                        val = val_df.iloc[0][raw_kpi]
+                        kpi_row[hour] = None if pd.isna(val) else val
                     else:
                         kpi_row[hour] = None
                 report_data.append(kpi_row)
@@ -180,7 +181,10 @@ class KPIApp:
         current_row = 4
 
         green_fill = PatternFill(start_color="FFC6EFCE", end_color="FFC6EFCE", fill_type="solid")
+        green_font = Font(color="FF006100")
+
         red_fill = PatternFill(start_color="FFFFC7CE", end_color="FFFFC7CE", fill_type="solid")
+        red_font = Font(color="FF9C0006")
 
         for row_dict in report_data:
             kpi_name = row_dict['KPI']
@@ -212,20 +216,26 @@ class KPIApp:
                 if kpi_name == 'Average of ORA_3G_Cell Availability (%)':
                     if float(val) >= 98.5:
                         cell.fill = green_fill
+                        cell.font = green_font
                     else:
                         cell.fill = red_fill
+                        cell.font = red_font
 
                 elif kpi_name in ['Average of OCM_3G_CSSR_CS_CellPCH_URAPCH_New(%)', 'Average of OCM_3G_CSSR_PS_CellPCH_URAPCH_New(%)']:
                     if float(val) >= 98.5:
                         cell.fill = green_fill
+                        cell.font = green_font
                     else:
                         cell.fill = red_fill
+                        cell.font = red_font
 
                 elif kpi_name in ['Average of OCM_3G_Call_Drop_CS_New(%)', 'Average of ORA_3G_Call_Drop_PS_All_Data_Services_New(%)']:
                     if float(val) <= 0.7:
                         cell.fill = green_fill
+                        cell.font = green_font
                     else:
                         cell.fill = red_fill
+                        cell.font = red_font
 
                 # Traffic CS / Traffic Data don't get colored (always white/no fill)
 
