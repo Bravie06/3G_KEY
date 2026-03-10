@@ -3,7 +3,7 @@ from tkinter import ttk, filedialog, messagebox
 import pandas as pd
 from datetime import datetime
 import openpyxl
-from openpyxl.styles import PatternFill, Font
+from openpyxl.styles import PatternFill, Font, Border, Side
 import os
 from pathlib import Path
 
@@ -38,7 +38,11 @@ class KPIApp:
 
         # Action Button
         self.btn_generate = ttk.Button(self.root, text="Generate Report", command=self.run_generation)
-        self.btn_generate.pack(pady=30)
+        self.btn_generate.pack(pady=20)
+
+        # Info Label
+        info_label = ttk.Label(self.root, text="The generated report will be saved directly to your Downloads folder.", foreground="gray", font=("Arial", 9, "italic"))
+        info_label.pack(side='bottom', pady=10)
 
     def select_file(self):
         file_path = filedialog.askopenfilename(
@@ -52,8 +56,12 @@ class KPIApp:
     def run_generation(self):
         event_name = self.event_entry.get().strip()
 
+        # Sanitize event name to prevent invalid filename characters
+        import re
+        event_name = re.sub(r'[\\/*?:"<>|]', "", event_name)
+
         if not event_name:
-            messagebox.showwarning("Warning", "Please enter an event name.")
+            messagebox.showwarning("Warning", "Please enter a valid event name without special characters.")
             return
 
         if not self.raw_file_path:
@@ -176,11 +184,21 @@ class KPIApp:
         ws = wb.active
         ws.title = "Report"
 
+        # Define a thin border to preserve gridlines
+        thin_border = Border(
+            left=Side(style='thin', color='D4D4D4'),
+            right=Side(style='thin', color='D4D4D4'),
+            top=Side(style='thin', color='D4D4D4'),
+            bottom=Side(style='thin', color='D4D4D4')
+        )
+
         # Write header
         # Row 3 is "Row Labels" and the hours
-        ws.cell(row=3, column=1, value="Row Labels")
+        header_cell = ws.cell(row=3, column=1, value="Row Labels")
+        header_cell.border = thin_border
         for i, hour in enumerate(unique_hours):
-            ws.cell(row=3, column=2+i, value=hour)
+            c = ws.cell(row=3, column=2+i, value=hour)
+            c.border = thin_border
 
         # Write data
         current_row = 4
@@ -193,7 +211,8 @@ class KPIApp:
 
         for row_dict in report_data:
             kpi_name = row_dict['KPI']
-            ws.cell(row=current_row, column=1, value=kpi_name)
+            kpi_cell = ws.cell(row=current_row, column=1, value=kpi_name)
+            kpi_cell.border = thin_border
 
             # If this is not a KPI row (it's a NodeB Name row)
             if kpi_name not in [
@@ -206,13 +225,25 @@ class KPIApp:
                 'Sum of ORA_3G_Traffic Total Data_MAC (GB)'
             ]:
                 # Apply bold to nodeB name (optional but good)
-                ws.cell(row=current_row, column=1).font = openpyxl.styles.Font(bold=True)
+                kpi_cell.font = openpyxl.styles.Font(bold=True)
+                # Fill the rest of the node name row with empty borders for visual consistency
+                for i in range(len(unique_hours)):
+                    ws.cell(row=current_row, column=2+i).border = thin_border
                 current_row += 1
                 continue
 
             for i, hour in enumerate(unique_hours):
                 val = row_dict[hour]
+
+                # Format to 2 decimal places if it's a number
+                if val is not None and isinstance(val, (int, float)):
+                    val = round(float(val), 2)
+
                 cell = ws.cell(row=current_row, column=2+i, value=val)
+                cell.border = thin_border
+
+                if val is not None and isinstance(val, (int, float)):
+                    cell.number_format = '0.00'
 
                 if val is None:
                     continue
