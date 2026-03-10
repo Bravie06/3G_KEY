@@ -4,6 +4,8 @@ import pandas as pd
 from datetime import datetime
 import openpyxl
 from openpyxl.styles import PatternFill
+import os
+from pathlib import Path
 
 class KPIApp:
     def __init__(self, root):
@@ -160,6 +162,9 @@ class KPIApp:
         hours_str = now.strftime("%H%M%S")
         output_filename = f"KEA_3G_{event_name}_{date_of_day}_{hours_str}.xlsx"
 
+        # Save in the user's Downloads folder
+        downloads_path = str(Path.home() / "Downloads" / output_filename)
+
         # Create workbook and worksheet
         wb = openpyxl.Workbook()
         ws = wb.active
@@ -230,8 +235,8 @@ class KPIApp:
         ws.column_dimensions['A'].width = 60
 
         # Save workbook
-        wb.save(output_filename)
-        return output_filename
+        wb.save(downloads_path)
+        return downloads_path
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -17,7 +17,7 @@ It strictly respects the provided template and applies the same formatting and c
 2. Click on **Select Raw Data File** to choose your raw Excel file (either site-level or city-level data).
 3. Click on **Generate Report**.
 4. Wait while the tool processes the data (extracts the last 10 hours, applies formatting).
-5. A success message will be displayed once the file has been successfully generated in the same folder as the program.
+5. A success message will be displayed once the file has been successfully generated in your Downloads folder.
 
 ## Confidentiality
 This tool runs 100% locally on your machine. No data is sent to an external server or API, strictly respecting your security requirements.
