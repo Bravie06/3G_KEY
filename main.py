@@ -126,6 +126,11 @@ class KPIApp:
             if raw_kpi in df_filtered.columns:
                 df_filtered[raw_kpi] = pd.to_numeric(df_filtered[raw_kpi], errors='coerce')
 
+                # If the raw KPI is a percentage, it needs to be multiplied by 100
+                # to match the template format (e.g. 1 becomes 100, 0.005 becomes 0.5)
+                if '(%)' in raw_kpi:
+                    df_filtered[raw_kpi] = df_filtered[raw_kpi] * 100
+
         # Build the final structured data for our report
 
         report_data = []
